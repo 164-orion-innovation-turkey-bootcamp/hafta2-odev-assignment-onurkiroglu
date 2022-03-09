@@ -1,95 +1,89 @@
 
-// köfte mi tavuk mu?
-// burgerde neler olsun (domates, turşu, soğan)
-// ekmekle birleştir
-// ek tercihler (sos, patates, kola)
+// Malzeme listesini tanımladık
+let stock={lettuce:5,
+    pickle:5,
+    packetSauce:5,
+    onion:5,
+    tomato:51,
+    bread:5,
+    potato:5,
+    cola:5,
+    chicken:5,
+    burger:5}
 
 
-let stock =  {               // stock is defined
-    meat: 5,
-    chicken: 5,
-    patatoes: 5,
-    coke: 5,
-    pickles: 5,
-    onion: 5,
-    lettuce: 5,
-    tomatoes: 5,
-    bread: 5,
-    packetSauce: 5,
-};
-
-let meatChoice;
-let cookDegree; 
-let newBurger;
-
-let burgerIngredients = ["tomatoes", "pickles", "lettuce", "onion"];
-
-let orderTime = (time, work) => {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            resolve(work());
-        }, time);
-    });
-};
-
-
-
-async function orderProcess() {
-    try {
-        // Sipariş al
-        await orderTime(1000, (() => console.log('Welcome, how do you like your burger? tomatoes/ pickles/ lettuce/ onion')))
-
-        // Stok kontrolü
-        await orderTime(3000, (() => {
-            for (let x in stock) {
-                if (stock[x] === 0) {  
-                    console.log('No enough ingredient, sorry')
-                }
-            }
-            console.log('Stock checked')
-        }))
-        cookLevel();
-
-    } catch(err) {
-        
-    } finally {
-        
+// Tavuk / Köfte seçimini yaptırdık
+function meatChoice(){
+    let meat=prompt("1.Tavuk 2.Köfte")
+    if(meat==1){
+    stock.chicken--
+    console.log("Siparişiniz hazırlanıyor")
     }
-} 
 
-
-async function cookLevel() {
-    try {
-        //Köfte mi Tavuk mu?
-        await orderTime(1000, (() => console.log("Meat or Chicken?" )))
-        if (meatChoice === "meat" && cookDegree === "rare") {
-            order(2000, () => {                          
-                console.log("Rare burger is on the way ");
-            })
-        }
-        if (meatChoice === "meat" && cookDegree === "medium") {
-            order(3000, () => {                          
-                console.log("Rare burger is on the way ");
-            })
-        }
-        if (meatChoice === "meat" && cookDegree === "well") {
-            order(4000, () => {                          
-                console.log("Rare burger is on the way");
-            })
-        }
-        if (meatChoice === "chicken") {
-            order(3000, () => {                          
-                console.log("Chicken burger is on the way");
-            })
-        }
-
-    } catch(err) {
-        
-    } finally {
-        
+    else if(meat==2){
+    stock.burger--
+    cook=prompt("Pişme derecesi seçiniz: \n 1.Az Pişmiş\n 2.Orta Pişmiş\n3.Çok Pişmiş")
+    }
+    else if(meat!==2 && meat!==1){
+    console.log('Hatalı giriş yaptınız ')
     }
 }
 
-orderProcess();
+// cook=0 referans değer alındı. 1,2,3 seçilmezse 0 seçilmiş oluyor.
+let cook=0
 
+// Sipariş alındıktan sonra gereken beklemeler oluşturuldu.
+async function cookingProcess(){
+   if(cook==0){
+   await  order(()=>{console.log("Tavuk burger siparişiniz hazır.")},3000)
+   }
+   else if(cook==1){
+    await order(()=>console.log("Az pişmiş burgeriniz hazır."),2000)
+   }
+   else if(cook==2){
+    await order(()=>console.log("Orta pişmiş burgeriniz hazır."),3000)
+   }
+   else if(cook==3){
+    await order(()=>console.log("Çok pişmiş burgeriniz hazır."),4000)
+   }
+}
+
+// Await için gereken promise yapısını kurduk.
+let order=(work,time)=>{
+    return new Promise((resolve)=>{
+       return setTimeout(()=>{
+         resolve(work())
+        },time)
+    }
+    )
+}
+
+
+let stockCheck=()=>{
+    return new Promise((resolve,reject)=>{
+        if(Object.values(stock).every((element) => element > 0)){
+            setTimeout(()=>{
+                resolve(console.log("2.stok kontrolü yapıldı."))
+            },3000)
+        }
+        else{
+            reject(console.log("Stokta yeterli ürün yok"))
+        }
+    })	
+}
+
+
+
+async function tasks(){
+    await order(()=>{console.log("1.sipariş alındı.")},1000)
+    await stockCheck() 
+    await order(meatChoice,1000)
+    order(()=>{stock.potato--,console.log("4.patatesler hazır.")},5000)
+    order(()=>{stock.cola--,console.log("5.içecekler hazır.")},2000)
+    await cookingProcess()
+    await order(()=>{stock.bread--, console.log("3.1 hamburger hazır.")},2000)
+    await order(()=>{stock.packetSauce--, console.log("6.soslar ve ürünler servis tepsisine koyuldu.")},1000)
+    order(()=>{console.log("7.müşteriye servis edildi.")},1000)
+}
+tasks()
 
